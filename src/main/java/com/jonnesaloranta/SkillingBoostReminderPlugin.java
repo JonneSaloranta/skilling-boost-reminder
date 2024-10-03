@@ -8,7 +8,6 @@ import com.jonnesaloranta.enums.PlayerAnim;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
-import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.widgets.Widget;
@@ -17,13 +16,16 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
 
 @Slf4j
 @PluginDescriptor(
-	name = "Skilling Boost Reminder"
+		name = "Skilling Boost Reminder",
+		description = "Reminds you to use special attack to boost skilling",
+		tags = {"skilling", "boost", "reminder", "special attack", "spec", "woodcutting", "fishing", "mining"}
 )
-public class SkillingBoostReminderPlugin extends Plugin
-{
+public class SkillingBoostReminderPlugin extends Plugin {
+
 	@Inject
 	private Client client;
 
@@ -33,8 +35,14 @@ public class SkillingBoostReminderPlugin extends Plugin
 	@Inject
 	private Notifier notifier;
 
-    @Getter
-	private final int main_hand_slot = EquipmentInventorySlot.WEAPON.getSlotIdx();
+	@Inject
+	private OverlayManager overlayManager;
+
+	@Inject
+	private SkillingBoostReminderOverlay overlay;
+
+	@Getter
+	private final int mainHandSlot = EquipmentInventorySlot.WEAPON.getSlotIdx();
 
 	@Getter
 	private int mainHandItemID = -1;
@@ -51,135 +59,133 @@ public class SkillingBoostReminderPlugin extends Plugin
 	@Getter
 	private boolean isNotified = false;
 
-	@Getter
-	private int specWidgetID = 10485796;
+	private final int specTextWidgetID = 10485796;
 
+	private String reminderMessage = "You can boost with special attack!";
 
-
-    @Override
-	protected void startUp() throws Exception
-	{
+	@Override
+	protected void startUp() throws Exception {
 		log.info("SkillBoostReminder started!");
+		overlayManager.add(overlay);
 	}
 
 	@Override
-	protected void shutDown() throws Exception
-	{
+	protected void shutDown() throws Exception {
 		log.info("SkillBoostReminder stopped!");
+		overlayManager.remove(overlay);
 	}
 
 	@Subscribe
-	public void onItemContainerChanged(final ItemContainerChanged event)
-	{
-		final ItemContainer itemContainer = event.getItemContainer();
-		if (event.getContainerId() == InventoryID.EQUIPMENT.getId())
-		{
-            Item[] equippedItems = itemContainer.getItems();
-			// get the item in the main hand slot
-			final Item mainHandItem = equippedItems[main_hand_slot];
-			final int itemID = mainHandItem.getId();
-			if (mainHandItemID != itemID)
-			{
+	public void onItemContainerChanged(final ItemContainerChanged event) {
+		if (event.getContainerId() == InventoryID.EQUIPMENT.getId()) {
+			Item mainHandItem = event.getItemContainer().getItems()[mainHandSlot];
+			int itemID = mainHandItem.getId();
+			if (mainHandItemID != itemID) {
 				mainHandItemID = itemID;
 			}
 		}
 	}
 
 	@Subscribe
-	public void onGameTick(GameTick event)
-	{
+	public void onGameTick(GameTick event) {
+		int animID = client.getLocalPlayer().getAnimation();
+		updateSkillingStatus(animID);
+		updateBoostStatus();
 
-		Widget widget = client.getWidget(specWidgetID);
+		if (isSkilling && canBoost && !isNotified) {
+			notifyBoost();
+		}
 
-		switch (client.getLocalPlayer().getAnimation())
-		{
+		handleWidgetVisibility();
+	}
+
+	private void updateSkillingStatus(int animID) {
+		switch (animID) {
 			case PlayerAnim.ANIM_MINING:
-				if(config.mining()){
-					isSkilling = true;
-				}
+				isSkilling = config.mining();
+				break;
+			case PlayerAnim.ANIM_FISHING:
+				isSkilling = config.fishing();
+				break;
+			case PlayerAnim.ANIM_WOODCUTTING:
+			case PlayerAnim.ANIM_WOODCUTTING_FELLING_AXE:
+				isSkilling = config.woodcutting();
 				break;
 			default:
 				isSkilling = false;
 				break;
 		}
+	}
 
 
-		if (isSkilling) {
-			switch (mainHandItemID){
-				case BoostItems.DRAGON_PICKAXE:
-				case BoostItems.DRAGON_PICKAXE_OR:
-				case BoostItems.INFERNAL_PICKAXE:
-				case BoostItems.CRYSTAL_PICKAXE:
-				case BoostItems.THIRD_AGE_PICKAXE:
-
-				case BoostItems.DRAGON_AXE:
-				case BoostItems.DRAGON_AXE_OR:
-				case BoostItems.INFERNAL_AXE:
-				case BoostItems.CRYSTAL_AXE:
-				case BoostItems.THIRD_AGE_AXE:
-
-				case BoostItems.DRAGON_HARPOON:
-				case BoostItems.DRAGON_HARPOON_OR:
-				case BoostItems.INFERNAL_HARPOON:
-					canBoost = canBoost();
-					break;
-			}
-		}
-
-		if(canBoost && !isNotified){
-			if(config.remindChat()){
-				client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", "You can boost with special attack!", null);
-			}
-			if(config.remindNotify()){
-				notifier.notify("You can boost with special attack!");
-			}
-			isNotified = true;
-		}
-
-		if(timer > 0 && canBoost){
-			timer--;
-
-
-			if(timer % 2 == 1){
-				if(widget != null){
-					widget.setHidden(true);
-				}
-			}else{
-				if(widget != null){
-					widget.setHidden(false);
-				}
-			}
-		}
-
-		if(timer <= 0){
-			timer = config.remindTimer();
-			if(widget != null){
-				widget.setHidden(false);
-			}
-			canBoost = false;
-			isNotified = false;
+	private void updateBoostStatus() {
+		if (isSkilling && isBoostableItem(mainHandItemID)) {
+			canBoost = canBoost();
 		}
 	}
 
-	private boolean canBoost(){
-
-        Widget widget = client.getWidget(specWidgetID);
-		if (widget != null)
-		{
-			String text = widget.getText();
-			if (text != null)
-			{
-				int specialAttack = Integer.parseInt(text);
-                return specialAttack == 100;
-			}
+	private boolean isBoostableItem(int itemID) {
+		switch (itemID) {
+			case BoostItems.DRAGON_PICKAXE:
+			case BoostItems.DRAGON_PICKAXE_OR:
+			case BoostItems.DRAGON_FELLING_AXE:
+			case BoostItems.INFERNAL_PICKAXE:
+			case BoostItems.CRYSTAL_PICKAXE:
+			case BoostItems.THIRD_AGE_PICKAXE:
+			case BoostItems.DRAGON_AXE:
+			case BoostItems.DRAGON_AXE_OR:
+			case BoostItems.INFERNAL_AXE:
+			case BoostItems.CRYSTAL_AXE:
+			case BoostItems.THIRD_AGE_AXE:
+			case BoostItems.DRAGON_HARPOON:
+			case BoostItems.DRAGON_HARPOON_OR:
+			case BoostItems.INFERNAL_HARPOON:
+				return true;
+			default:
+				return false;
 		}
+	}
 
+	private void notifyBoost() {
+		if (config.remindChat()) {
+			client.addChatMessage(ChatMessageType.GAMEMESSAGE, "", reminderMessage, null);
+		}
+		if (config.remindNotify()) {
+			notifier.notify(reminderMessage);
+		}
+		isNotified = true;
+	}
+
+	private void handleWidgetVisibility() {
+		Widget widget = client.getWidget(specTextWidgetID);
+		if (timer > 0 && canBoost) {
+			timer--;
+			if (widget != null) {
+				overlay.setHighlighted(timer % 2 == 1);
+			}
+		} else if (timer <= 0) {
+			resetTimer(widget);
+		}
+	}
+
+	private void resetTimer(Widget widget) {
+		timer = config.remindTimer();
+		canBoost = false;
+		overlay.setHighlighted(false);
+		isNotified = false;
+	}
+
+	private boolean canBoost() {
+		Widget widget = client.getWidget(specTextWidgetID);
+		if (widget != null) {
+			String text = widget.getText();
+			return text != null && Integer.parseInt(text) == 100;
+		}
 		return false;
 	}
 
 	@Provides
-	SkillingBoostReminderConfig provideConfig(ConfigManager configManager)
-	{
+	SkillingBoostReminderConfig provideConfig(ConfigManager configManager) {
 		return configManager.getConfig(SkillingBoostReminderConfig.class);
 	}
 }
