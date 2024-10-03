@@ -4,6 +4,7 @@ A RuneLite plugin reminding you to use special attack to boost stats when skilli
 
 ## Preview
 
+![settings](https://github.com/user-attachments/assets/2ee298ba-757d-4b5a-9aa3-1e176a9f94db)
 
 
 ## Issues/Suggestions
