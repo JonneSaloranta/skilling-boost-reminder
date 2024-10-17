@@ -45,9 +45,10 @@ public interface SkillingBoostReminderConfig extends Config
 			section = "notification",
 			position = 2
 	)
+	// 1 tick = 0.6sec, 50 ticks = 30sec
 	default int remindTimer()
 	{
-		return 5;
+		return 50;
 	}
 
 	@ConfigItem(
@@ -74,6 +75,22 @@ public interface SkillingBoostReminderConfig extends Config
 	default Color highlightColor()
 	{
 		return Color.GREEN;
+	}
+
+	@Range(
+			min = 0,
+			max = 200
+	)
+	@ConfigItem(
+			keyName = "offsetY",
+			name = "Notifier arrow Y Offset",
+			description = "Adjusts the blinking arrow position up or down under the special attack button",
+			section = "notification",
+			position = 5
+	)
+	default int offsetY()
+	{
+		return 0;
 	}
 
 	@ConfigSection(
@@ -117,22 +134,6 @@ public interface SkillingBoostReminderConfig extends Config
 	default boolean woodcutting()
 	{
 		return true;
-	}
-
-	@Range(
-		min = -200,
-		max = 200
-	)
-	@ConfigItem(
-		keyName = "offsetY",
-		name = "Arrow Offset Y",
-		description = "Adjusts the arrow position up or down",
-		section = "skills",
-		position = 3
-	)
-	default int offsetY()
-	{
-		return 0;
 	}
 
 }

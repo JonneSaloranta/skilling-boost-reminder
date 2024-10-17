@@ -51,7 +51,7 @@ public class SkillingBoostReminderOverlay extends Overlay {
             int offset = config.offsetY();
 
             // Set the points for the arrow (upward pointing triangle)
-            arrow.addPoint(bounds.x + bounds.width / 2, bounds.y + offset); // Top point
+            arrow.addPoint(bounds.x + bounds.width / 2, bounds.y + offset + 25); // Top point
             arrow.addPoint(bounds.x + (bounds.width / 2) - arrowWidth, bounds.y + arrowHeight + offset + 25); // Left
             // point
             arrow.addPoint(bounds.x + (bounds.width / 2) + arrowWidth, bounds.y + arrowHeight + offset + 25); // Right
