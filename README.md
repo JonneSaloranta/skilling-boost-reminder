@@ -1,9 +1,10 @@
 # Skilling Boost Reminder
+[![Active Installs](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/installs/plugin/skilling-boost-reminder)](https://runelite.net/plugin-hub/JonneSaloranta) [![Plugin Rank](http://img.shields.io/endpoint?url=https://api.runelite.net/pluginhub/shields/rank/plugin/skilling-boost-reminder)](https://runelite.net/plugin-hub)
 
 A RuneLite plugin reminding you to use special attack to boost stats when skilling.
 
-- [x] Reminds you to use 'Special Attack' to boost your stats.
-- [x] Works with Dragon, Crystal and 3rd age axes etc.
+- [x] Woodcutting, Fishing & Mining
+- [x] Works with Dragon, Crystal and 3rd age axes
 
 ## Preview
 
