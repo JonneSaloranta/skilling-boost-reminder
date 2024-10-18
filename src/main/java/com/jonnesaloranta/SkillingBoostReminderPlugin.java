@@ -105,6 +105,12 @@ public class SkillingBoostReminderPlugin extends Plugin {
 				isSkilling = config.mining();
 				break;
 			case PlayerAnim.ANIM_FISHING:
+			case PlayerAnim.ANIM_FISHING_1:
+			case PlayerAnim.ANIM_FISHING_2:
+			case PlayerAnim.ANIM_FISHING_3:
+			case PlayerAnim.ANIM_FISHING_4:
+			case PlayerAnim.ANIM_FISHING_5:
+			case PlayerAnim.ANIM_FISHING_6:
 				isSkilling = config.fishing();
 				break;
 			case PlayerAnim.ANIM_WOODCUTTING:
