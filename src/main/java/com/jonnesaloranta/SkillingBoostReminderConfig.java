@@ -78,15 +78,31 @@ public interface SkillingBoostReminderConfig extends Config
 	}
 
 	@Range(
-			min = 0,
-			max = 200
+			min = -999,
+			max = 999
+	)
+	@ConfigItem(
+			keyName = "offsetX",
+			name = "Notifier arrow X Offset",
+			description = "Adjusts the blinking arrow position left and right. Should default under the special attack button",
+			section = "notification",
+			position = 5
+	)
+	default int offsetX()
+	{
+		return 0;
+	}
+
+	@Range(
+			min = -999,
+			max = 999
 	)
 	@ConfigItem(
 			keyName = "offsetY",
 			name = "Notifier arrow Y Offset",
-			description = "Adjusts the blinking arrow position up or down under the special attack button",
+			description = "Adjusts the blinking arrow position up and down. Should default under the special attack button",
 			section = "notification",
-			position = 5
+			position = 6
 	)
 	default int offsetY()
 	{
