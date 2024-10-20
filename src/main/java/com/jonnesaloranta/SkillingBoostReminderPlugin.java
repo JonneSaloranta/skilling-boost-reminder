@@ -33,6 +33,9 @@ public class SkillingBoostReminderPlugin extends Plugin {
 	private SkillingBoostReminderConfig config;
 
 	@Inject
+	private ConfigManager configManager;
+
+	@Inject
 	private Notifier notifier;
 
 	@Inject
@@ -67,6 +70,19 @@ public class SkillingBoostReminderPlugin extends Plugin {
 	protected void startUp() throws Exception {
 		log.info("SkillBoostReminder started!");
 		overlayManager.add(overlay);
+
+		checkConfigValues();
+	}
+
+	private void checkConfigValues() {
+		if(config.offsetX() > 999 || config.offsetX() < -999){
+			configManager.setConfiguration("notification", "offsetX", 0);
+		}
+
+		if(config.offsetY() > 999 || config.offsetY() < -999){
+			configManager.setConfiguration("notification", "offsetY", 0);
+		}
+
 	}
 
 	@Override
