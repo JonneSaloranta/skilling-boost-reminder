@@ -43,18 +43,18 @@ public class SkillingBoostReminderOverlay extends Overlay {
 
         if (isHighlighted && config.highlightSpecWidget()) {
 
-
             Polygon arrow = new Polygon();
             int arrowWidth = bounds.width / 4;
             int arrowHeight = bounds.height / 2;  // Adjust arrow height
 
-            int offset = config.offsetY();
+            int offsetY = config.offsetY();
+            int offsetX = config.offsetX();
 
             // Set the points for the arrow (upward pointing triangle)
-            arrow.addPoint(bounds.x + bounds.width / 2, bounds.y + offset + 25); // Top point
-            arrow.addPoint(bounds.x + (bounds.width / 2) - arrowWidth, bounds.y + arrowHeight + offset + 25); // Left
+            arrow.addPoint(offsetX + bounds.x + bounds.width / 2, bounds.y + offsetY + 25); // Top point
+            arrow.addPoint(offsetX + bounds.x + (bounds.width / 2) - arrowWidth, bounds.y + arrowHeight + offsetY + 25); // Left
             // point
-            arrow.addPoint(bounds.x + (bounds.width / 2) + arrowWidth, bounds.y + arrowHeight + offset + 25); // Right
+            arrow.addPoint(offsetX + bounds.x + (bounds.width / 2) + arrowWidth, bounds.y + arrowHeight + offsetY + 25); // Right
             // point
 
             graphics2D.setColor(color);
