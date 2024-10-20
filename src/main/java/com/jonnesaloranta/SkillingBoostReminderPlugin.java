@@ -201,7 +201,11 @@ public class SkillingBoostReminderPlugin extends Plugin {
 		Widget widget = client.getWidget(specTextWidgetID);
 		if (widget != null) {
 			String text = widget.getText();
-			return text != null && Integer.parseInt(text) == 100;
+			try {
+				return text != null && Integer.parseInt(text) == 100;
+			} catch (NumberFormatException e) {
+				return false;
+			}
 		}
 		return false;
 	}
