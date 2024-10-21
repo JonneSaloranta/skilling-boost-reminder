@@ -180,17 +180,22 @@ public class SkillingBoostReminderPlugin extends Plugin {
 
 	private void handleWidgetVisibility() {
 		Widget widget = client.getWidget(specTextWidgetID);
-		if (timer > 0 && canBoost) {
-			timer--;
-			if (widget != null) {
-				overlay.setHighlighted(timer % 2 == 1);
+
+		if(canBoost){
+			if (timer > 0) {
+				timer--;
+				if (widget != null) {
+					overlay.setHighlighted(timer % 2 == 1);
+				}
+			} else {
+				resetTimer();
 			}
-		} else if (timer <= 0) {
-			resetTimer(widget);
+		}else{
+			resetTimer();
 		}
 	}
 
-	private void resetTimer(Widget widget) {
+	private void resetTimer() {
 		timer = config.remindTimer();
 		canBoost = false;
 		overlay.setHighlighted(false);
@@ -201,7 +206,11 @@ public class SkillingBoostReminderPlugin extends Plugin {
 		Widget widget = client.getWidget(specTextWidgetID);
 		if (widget != null) {
 			String text = widget.getText();
-			return text != null && Integer.parseInt(text) == 100;
+			try {
+				return text != null && Integer.parseInt(text) == 100;
+			} catch (NumberFormatException e) {
+				return false;
+			}
 		}
 		return false;
 	}
